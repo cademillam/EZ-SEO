@@ -17,16 +17,33 @@ def extract_text_from_url(url):
     except Exception as e:
         return f"Error: {e}"
 
-# Step 2: Placeholder for AI keyword generation
+import os
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()  # This loads your .env file
+
 def generate_keywords_with_ai(content, industry):
-    # In production: replace this with a call to LLaMA/OpenAI
-    return [
-        {"keyword": "best seo tools for small businesses", "volume": 1000, "competition": "Low"},
-        {"keyword": "how to rank on google in 2024", "volume": 880, "competition": "Medium"},
-        {"keyword": "seo keyword research for beginners", "volume": 720, "competition": "Medium"},
-        {"keyword": "long tail keywords example", "volume": 600, "competition": "Low"},
-        {"keyword": "free seo audit tools", "volume": 500, "competition": "High"}
-    ]
+    API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
+    headers = {"Authorization": f"Bearer {os.getenv('HF_API_KEY')}"}
+
+    prompt = f"Generate 10 long-tail SEO keywords for this website content in the {industry} industry:\n\n{content[:1000]}"
+
+    response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
+
+    if response.status_code != 200:
+        return [{"keyword": "API error", "volume": 0, "competition": "N/A"}]
+
+    try:
+        output = response.json()[0]["generated_text"]
+    except Exception:
+        return [{"keyword": "Parsing error", "volume": 0, "competition": "N/A"}]
+
+    keywords = [{"keyword": kw.strip(), "volume": "?", "competition": "?"}
+                for kw in output.split("\n") if kw.strip()]
+
+    return keywords
+
 
 @app.route('/generate_keywords', methods=['POST'])
 def generate_keywords():
