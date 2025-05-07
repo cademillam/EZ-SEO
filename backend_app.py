@@ -39,10 +39,35 @@ def generate_keywords_with_ai(content, industry):
     except Exception:
         return [{"keyword": "Parsing error", "volume": 0, "competition": "N/A"}]
 
-    keywords = [{"keyword": kw.strip(), "volume": "?", "competition": "?"}
-                for kw in output.split("\n") if kw.strip()]
+    keywords = []
+
+    for line in output.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if any([
+            line.lower().startswith("generate"),
+            "Volume:" in line,
+            "Products" in line,
+            "Corgea" in line,
+            "Start" in line,
+            "Demo" in line,
+            len(line.split()) < 3
+        ]):
+            continue
+        if line[0].isdigit() or line.startswith("-"):
+            keywords.append({
+                "keyword": line,
+                "volume": "?",
+                "competition": "?"
+            })
+
+    if not keywords:
+        keywords = [{"keyword": line.strip(), "volume": "?", "competition": "?"}
+                    for line in output.split("\n") if line.strip()]
 
     return keywords
+    
 
 
 @app.route('/generate_keywords', methods=['POST'])
