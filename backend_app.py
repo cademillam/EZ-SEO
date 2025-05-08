@@ -75,15 +75,15 @@ def generate_keywords():
     data = request.get_json()
     url = data.get('url')
     industry = data.get('industry', 'general')
+    mode = data.get('mode', 'seo')  # NEW: check if user wants geo or seo
 
-    # Extract content from URL
     content = extract_text_from_url(url)
     if content.startswith("Error"):
         return jsonify({"error": content}), 400
 
-    # Use AI (placeholder) to generate keywords
-    keywords = generate_keywords_with_ai(content, industry)
+    keywords = generate_keywords_with_ai(content, industry, mode=mode)  # pass mode here
     return jsonify(keywords)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
