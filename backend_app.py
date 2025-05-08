@@ -23,21 +23,30 @@ from dotenv import load_dotenv
 
 load_dotenv()  # This loads your .env file
 
-def generate_keywords_with_ai(content, industry):
+def generate_keywords_with_ai(content, industry, mode="seo"):
     API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
     headers = {"Authorization": f"Bearer {os.getenv('HF_API_KEY')}"}
 
-    prompt = f"Generate 10 long-tail SEO keywords for this website content in the {industry} industry:\n\n{content[:1000]}"
+    if mode == "geo":
+        prompt = (
+            f"Generate 10 phrases or questions that would help this website be recommended by AI engines like ChatGPT, "
+            f"Perplexity, or Bing Copilot. Use a natural, helpful, and educational tone relevant to the {industry} industry.\n\n"
+            f"{content[:1000]}"
+        )
+    else:
+        prompt = (
+            f"Generate 10 long-tail SEO keywords for this website content in the {industry} industry:\n\n{content[:1000]}"
+        )
 
     response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
 
     if response.status_code != 200:
-        return [{"keyword": "API error", "volume": 0, "competition": "N/A"}]
+        return [{"keyword": "API error", "volume": "?", "competition": "?"}]
 
     try:
         output = response.json()[0]["generated_text"]
     except Exception:
-        return [{"keyword": "Parsing error", "volume": 0, "competition": "N/A"}]
+        return [{"keyword": "Parsing error", "volume": "?", "competition": "?"}]
 
     keywords = []
 
@@ -56,17 +65,20 @@ def generate_keywords_with_ai(content, industry):
         ]):
             continue
         if line[0].isdigit() or line.startswith("-"):
-            keywords.append({
-                "keyword": line,
-                "volume": "?",
-                "competition": "?"
-            })
+            entry = {"keyword": line}
+            if mode == "seo":
+                entry["volume"] = "?"
+                entry["competition"] = "?"
+            else:
+                entry["type"] = "geo"
+            keywords.append(entry)
 
     if not keywords:
         keywords = [{"keyword": line.strip(), "volume": "?", "competition": "?"}
                     for line in output.split("\n") if line.strip()]
 
     return keywords
+
     
 
 
