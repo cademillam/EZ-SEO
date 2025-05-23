@@ -24,20 +24,25 @@ from dotenv import load_dotenv
 
 load_dotenv()  # This loads your .env file
 
-def generate_keywords_with_ai(content, industry, mode="seo"):
+def generate_keywords_with_ai(content, mode="seo"):
     API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
     headers = {"Authorization": f"Bearer {os.getenv('HF_API_KEY')}"}
 
     if mode == "geo":
         prompt = (
-            f"Generate 10 phrases or questions that would help this website be recommended by AI engines like ChatGPT, "
-            f"Perplexity, or Bing Copilot. Use a natural, helpful, and educational tone relevant to the {industry} industry.\n\n"
+            f"Generate 10 concise questions that a user would ask a search assistant about the following website content. "
+            f"Focus on the core information and services the website provides. Phrase the questions as if a user needs specific help or information. "
+            f"Keep the questions short (maximum 7 words). Avoid overly promotional or marketing-oriented language.\n\n"
             f"{content[:1000]}"
         )
     else:
         prompt = (
-            f"Generate 10 long-tail SEO keywords for this website content in the {industry} industry:\n\n{content[:1000]}"
-        )
+            f"Analyze the following website content and generate 10 concise SEO keywords (maximum 5 words each) that a user would likely use to find similar content online " 
+            f"Identify the main topics, user needs, and search intent expressed in the content. Provide keywords in a natural, conversational search phrase format that users would likely search on a search engine such as Google, Bing, and Yahoo. " 
+            f"Prioritize keywords that are relevant, specific, and likely to drive targeted traffic.\n\n" 
+            f"{content[:1000]}" 
+        ) 
+        
 
     response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
 
@@ -87,14 +92,14 @@ def generate_keywords_with_ai(content, industry, mode="seo"):
 def generate_keywords():
     data = request.get_json()
     url = data.get('url')
-    industry = data.get('industry', 'general')
+    #industry = data.get('industry', 'general')
     mode = data.get('mode', 'seo')  # NEW: check if user wants geo or seo
 
     content = extract_text_from_url(url)
     if content.startswith("Error"):
         return jsonify({"error": content}), 400
 
-    keywords = generate_keywords_with_ai(content, industry, mode=mode)  # pass mode here
+    keywords = generate_keywords_with_ai(content, mode=mode)  # pass mode here
     return jsonify(keywords)
 
 
