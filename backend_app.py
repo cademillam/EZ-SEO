@@ -45,7 +45,9 @@ def generate_keywords_with_ai(content, mode="seo"):
         
 
     response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
-
+# ✅ Safe debug logging
+    print("HF RESPONSE:", response.status_code)
+    print("RAW TEXT:", response.text)
     if response.status_code != 200:
         return [{"keyword": "API error", "volume": "?", "competition": "?"}]
 
