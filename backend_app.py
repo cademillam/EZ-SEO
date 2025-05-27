@@ -31,17 +31,22 @@ def generate_keywords_with_ai(content, mode="seo"):
     if mode == "geo":
         prompt = (
             f"Generate 10 concise questions that a user would ask a search assistant about the following website content. "
-            f"Focus on the core information and services the website provides. Phrase the questions as if a user needs specific help or information. "
-            f"Keep the questions short (maximum 7 words). Avoid overly promotional or marketing-oriented language.\n\n"
+            f"Focus on the core information and services the website provides. "
+            f"Identify key terms and concepts on the website and use synonyms or related phrases where appropriate to add variety. "
+            f"Avoid using the website's brand name or overly general terms like 'service,' 'product,' or 'information' in every question. "
+            f"Phrase the questions as if a user needs specific help or information. Keep the questions short (maximum 7 words). "
+            f"Avoid overly promotional or marketing-oriented language.\n\n"
             f"{content[:1000]}"
-        )
+            )
     else:
         prompt = (
-            f"Analyze the following website content and generate 10 concise SEO keywords (maximum 5 words each) that a user would likely use to find similar content online " 
-            f"Identify the main topics, user needs, and search intent expressed in the content. Provide keywords in a natural, conversational search phrase format that users would likely search on a search engine such as Google, Bing, and Yahoo. " 
-            f"Prioritize keywords that are relevant, specific, and likely to drive targeted traffic.\n\n" 
-            f"{content[:1000]}" 
-        ) 
+            f"Analyze the following website content and generate 10 concise SEO keywords (maximum 5 words each) that a user would likely use to find similar information or services. "
+            f"Identify the main topics, user needs, and search intent. Instead of directly using terms from the website, brainstorm related keywords and synonyms that a user might search. "
+            f"Provide keywords in a natural, conversational search phrase format, mimicking typical search engine queries. "
+            f"Prioritize keywords that are relevant, varied, specific, and likely to attract a targeted audience. Avoid excessive repetition of words or phrases found directly on the website.\n\n"
+            f"{content[:1000]}"
+            )
+        
         
 
     response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
